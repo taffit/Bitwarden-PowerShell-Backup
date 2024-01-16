@@ -1,14 +1,21 @@
 ﻿#	Bitwarden-Attachment-Exporter
-#	Marviins, edited by justincswong
+#	Marviins, edited by justincswong, edited by taffit
 
     # Initialization Step
-    $username   = "REPLACE USERNAME HERE"    # keep the quotes, your username
-    $extension  = "csv"                      # csv or json, keep the quotes, your output file format
-    $gpg        = $false                     # $true or $false, true = gpg encrypt     false = skip gpg encrypt
-    $keyname    = "keyName"                  # gpg recipient, only required if gpg encrypting
-    $securedlt  = $false                     # $true or $false, true = secure delete   false = skip secure delete
+    $username            = "<username>"       # keep the quotes, your username
+    $organizationID      = "<organizationid>" # If an organizationid is provided, the organization vault is backed up
+                                              # Leave it as is or empty to backup your personal vault
+    # We encrypt by default, everything else is insecure
+    $sevenZip            = $true              # $true or $false, true = ZIP files into an encrypted ZIP-file using a password (NOT the master password)
+    $sevenZipPath = "$env:ProgramFiles\7-Zip\7z.exe" # The command for, and eventually the whole path to, the 7zip-executable
+    $deleteFilesAfterZIP = $true              # Should the files be deleted once zipped?
+    $gpg                 = $false             # $true or $false, true = gpg encrypt     false = skip gpg encrypt
+    $keyname             = "keyName"          # gpg recipient, only required if gpg encrypting
+    $securedlt           = $false             # $true or $false, true = secure delete   false = skip secure delete
 
-    $key        = $null                      # don't change this
+    $backup_date_format  = get-date -Format "yyyy-MM-dd_hhmmss"
+
+    $key                 = $null              # don't change this
 
     # Master Password Prompt
     $masterPass = Read-Host -assecurestring "Please enter your master password"
@@ -28,35 +35,69 @@
         }
     }
 
-    Write-Host "You have logged in." -ForegroundColor Green
+    Write-Host "Successfully logged in." -ForegroundColor Green
     $env:BW_SESSION="$key"
 
+    # Encryption Password Prompt used for encrypting the export and 7zip-file
+    $encPass = Read-Host -assecurestring "Please enter the encryption password used for encrypting the backup"
+    $encPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($encPass))
+
     # Specify directory and filenames
-    $backupFolder = 'Backup'
-    $backupFile = (get-date -Format "yyyyMMdd_hhmmss") + "_Bitwarden_backup.$extension"
-    $attachmentFolder = (get-date -Format "yyyyMMdd_hhmmss") + '_Attachments'
+    $backupFolder = ".\Backup"
+    if (!(test-path -PathType container $backupFolder)) {
+      New-Item -ItemType Directory -Path $backupFolder | Out-Null
+    }
+    $backupPath = (Convert-Path -LiteralPath $backupFolder)
+    $backupFile = "$($backup_date_format)_Bitwarden_backup"
+    $attachmentsPath = "$backupPath\$($backup_date_format)_Attachments"
 
     # Backup Vault
     Write-Host "`nExporting Bitwarden Vault"
     bw sync
-    bw export --output "$backupFolder\$backupFile" --format $extension $masterPass
-    write-host "`n"
+    Write-Host "`n"
+    if ($organizationID -ne "<organizationid>" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
+      bw export --output "$backupPath\$backupFile.enc.json" --organizationid $organizationID --password '$encPass'
+    } else {
+      bw export --output "$backupPath\$backupFile.enc.json" --format encrypted_json --password '$encPass'
+    }
+    Write-Host "`n"
 
     # Backup Attachments
-    $vault = bw list items | ConvertFrom-Json
+    if ($organizationID -ne "<organizationid>" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
+      $vault = bw list items --organizationid $organizationID | ConvertFrom-Json
+    } else {
+      $vault = bw list items | ConvertFrom-Json
+    }
 
     foreach ($item in $vault){
         if($item.PSobject.Properties.Name -contains "Attachments"){
            foreach ($attachment in $item.attachments){
-              $exportName = '[' + $item.name + '] - ' + $attachment.fileName
-            bw get attachment $attachment.id --itemid $item.id --output "$backupFolder\$attachmentFolder\$exportName"
-	    	write-host "`n"
+            $exportName = '[' + $item.name + ']-' + $attachment.fileName
+            bw get attachment $attachment.id --itemid $item.id --output "$attachmentsPath\$exportName"
+	    	Write-Host "`n"
 	     }
       }
     }
 
+    if ($sevenZip) {
+      if (-not (Test-Path -Path $sevenZipPath -PathType Leaf)) {
+        throw "7-zip executable '$sevenZipPath' not found"
+      }
+
+      Set-Alias 7z $sevenZipPath
+      $7zArgs = 'a', "`"$backupPath\$($backupFile).zip`"", '-mx9', '-tzip', '-bb0', $(if ($deleteFilesAfterZIP) {'-sdel'} else {"`b"}), "-p`"$encPass`"", "`"$backupPath\$backupFile.enc.json`"", "`"$attachmentsPath`""
+      #DEBUG: Write-Host "`n`"$sevenZipPath`" $7zArgs"
+      7z $7zArgs | Out-Null
+      if ( $? ) { # Status of last command executed was successful
+        Write-Host "`nGenerated encrypted ZIP-file."
+      } else {
+        Write-Host "`nThere were some warnings during zipping (path too long?).`nCheck the output-folder at $backupPath"
+      }
+      Write-Host "`n"
+    }
+
     # Logging Out/Termination Prep
-    Write-Host "The Vault has been successfully backed up."
+    Write-Host "The $(if ($organizationID -ne '<organizationid>' -And -Not ([string]::IsNullOrEmpty($organizationid))) {'organization'} else {'personal'}) vault has been backed up."
     bw logout
     "`n"
 
@@ -66,7 +107,7 @@
         exit
     } else {
     # GPG Encryption Prep
-    $cdir = (Get-Item -Path '.\' -Verbose).FullName + "\$backupFolder"
+    $cdir = $backupPath
     Set-Location $cdir
 
     # GPG Encryption Step
