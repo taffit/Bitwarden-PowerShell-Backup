@@ -50,9 +50,10 @@ The ZIP-file will have the following structure:
 ## NOTES
 - As it should be as secure as possible, we only support the encrypted JSON format.
 - To decrypt a (password-)encrypted export without having to import it into your own vault, you can use the wonderful Python script at [GurpreetKang/BitwardenDecrypt](https://github.com/GurpreetKang/BitwardenDecrypt).
-- The whole GPG-section is completely untested by me, but as it comes from the fork and seems to work and may be helpful for some of you, I've left it in the script.
-- Enabling $securedlt can cause the backup process to take over 30 minutes. It completely overwrites the empty space in your Backup folder  to ensure that your unencrypted vault backup cannot be recovered.
-- Currently, the GPG encryption only supports the encryption of the backed up vault file. It does not encrypt attachments yet.
+- If an organization ID is provided, only the organization vault is exported, but your own personal vault **IS NOT** (and vice versa). Also the personal vaults of your colleagues/family members will **NOT BE EXPORTED**. You would need to run the script for each of them.
+- The whole GPG-section is completely untested by me, but as it comes from the fork and seems to work and may be helpful for some of you, I've left it in the script. Some notes from the original fork:
+  - Enabling $securedlt can cause the backup process to take over 30 minutes. It completely overwrites the empty space in your Backup folder  to ensure that your unencrypted vault backup cannot be recovered.
+  - Currently, the GPG encryption only supports the encryption of the backed up vault file. It does not encrypt attachments yet.
 
 ## DISCLAIMER
 This script works ***for me***. I can not be held responsible for any damage you experience when using it. ***Use it at your own risk!***
