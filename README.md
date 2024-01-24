@@ -59,5 +59,8 @@ The ZIP-file will have the following structure:
   - Enabling $securedlt can cause the backup process to take over 30 minutes. It completely overwrites the empty space in your Backup folder  to ensure that your unencrypted vault backup cannot be recovered.
   - Currently, the GPG encryption only supports the encryption of the backed up vault file. It does not encrypt attachments yet.
 
+## Known issues/ToDos
+- Special characters like German umlauts in the name of an entry are not encoded correctly when saving attachments, e. g. `ü` &rarr; `├╝`.
+
 ## DISCLAIMER
 This script works ***for me***. I can not be held responsible for any damage you experience when using it. ***Use it at your own risk!***
