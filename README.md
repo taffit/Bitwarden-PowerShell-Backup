@@ -8,6 +8,8 @@ This script provides a good balance between transparency (just read the `Bitward
 
 ## Requirements
 - Install the official [Bitwarden CLI](https://github.com/bitwarden/cli) according to the instructions on the page.
+> ***Note:*** The easiest way on Windows is probably to use `WinGet`: `winget install Bitwarden.CLI` and restart the shell, so the executable is available in your `%PATH%`. If you download just the native executable, either put it in the `%PATH%` or adjust the `%PATH%` environment variable so the executable can be found.    
+> Ensure that `bw` can be executed. It should present you the command help text.
 
 Optional:  
 - If you choose to use 7zip to encrypt the exports, you have to install [7-Zip](https://www.7-zip.org/) first.
@@ -15,23 +17,25 @@ Optional:
 
 ## How to use
 - Install the prerequisites mentioned above.
-- Download the `Bitwarden-backup.ps1`-file to a folder where your backup should be generated and open it in an editor of your choice.  
-  - Change `<username>` to your Bitwarden username.
-  - If you have an organization vault that you want to backup, change the `<organizationid>` to [the one used by your organization](https://bitwarden.com/help/cli/#organization-ids), else your personal vault will be backed up.
-  - If you want to save everything (encrypted JSON + all attachments) into a single encrypted ZIP-file, `$sevenZip` should be `$true` (default) and been installed beforehand, of course.
+- Download the `Bitwarden-backup.ps1`-file to a folder where your backup should be generated and open it in an editor of your choice.
+  - If you are using the servers located in the EU, adjust the value for the `$server`-variable appropriately (see comments there).
+  - Change `username` to your Bitwarden username/email.
+  - If you have an organization vault that you want to backup, change the `organizationid` to [the one used by your organization](https://bitwarden.com/help/cli/#organization-ids), else your personal vault will be backed up.
+  - If you want to save everything (encrypted JSON + all attachments) into a single encrypted ZIP-file, `$sevenZip` should be `$true` (default) and been installed beforehand, of course. If it is not installed to the default location, you have to adjust `$sevenZipPath` accordingly.
   - If the files should be removed once zipped, set `deleteFilesAfterZIP` to `$true` (default).
   - Choose to enable GPG encryption or not. (It is not enabled by default)
   - If you enable GPG encryption, replace $keyname with the recipient. i.e. Your key's name or email address  
   - Choose to enable a secure deletion of your file or not. NOTE: If enabled, this process can take over 30 minutes (It is off by default)  
-- Run the script (e. g. in a PowerShell-windows or by right clicking on the file and selecting `Run with PowerShell`).
+- Run the script (e. g. in a PowerShell-windows or by right clicking on the file and selecting `Run with PowerShell` or by starting a PowerShell, navigating to the directory with the script and invoking `.\Bitwarden-backup.ps1` there).
 - Your backup will begin and will be generated in the subfolder "Backup".
-    1. The login procedure for Bitwarden will be initiated, asking you for your master password (for the account configured in the file) and eventually the TOTP for the two-step login.
-    2. A password will be requested which will be used to encrypt the JSON-file downloaded as well as the ZIP-file. ***You better remember this password or you won't be able recover anything from the backup!***
-    3. The encrypted JSON file containing all your items will be exported.
-    4. All attachments will be downloaded into a subfolder with the same name/timestamp.
-    5. Finally the encrypted JSON along with the attachments-folder will be compressed into a single, encrypted ZIP-file.
-    6. If configured, the downloaded files will be removed once zipped.
-    7. I personally didn't check the GPG encryption, although it should work.
+    1. The server will be set (if different to the one provided in the script).
+    2. The login procedure for Bitwarden will be initiated, asking you for your master password (for the account configured in the file) and eventually the TOTP for the two-step login.
+    3. A password will be requested which will be used to encrypt the JSON-file downloaded as well as the ZIP-file. ***You better remember this password or you won't be able recover anything from the backup!***
+    4. The encrypted JSON file containing all your items will be exported.
+    5. All attachments will be downloaded into a subfolder with the same name/timestamp.
+    6. Finally the encrypted JSON along with the attachments-folder will be compressed into a single, encrypted ZIP-file.
+    7. If configured, the downloaded files will be removed once zipped.
+    8. I personally didn't check the GPG encryption, although it should work.
 
 ![Screenshot](screenshot.png)
 

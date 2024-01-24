@@ -2,8 +2,13 @@
 #	Marviins, edited by justincswong, edited by taffit
 
     # Initialization Step
-    $username            = "<username>"       # keep the quotes, your username
-    $organizationID      = "<organizationid>" # If an organizationid is provided, the organization vault is backed up
+    # Point $server to the correct URL, e. g.:
+    #    Bitwarden (default) : https://bitwarden.com
+    #    Bitwarden EU        : https://vault.bitwarden.eu
+    #    Self-hosted instance: e. g. https://my_bitwarden.selfhosted.com
+    $server              = "https://bitwarden.com"
+    $username            = "username"         # keep the quotes, your username
+    $organizationID      = "organizationid"   # If an organizationid is provided, the organization vault is backed up
                                               # Leave it as is or empty to backup your personal vault
     # We encrypt by default, everything else is insecure
     $sevenZip            = $true              # $true or $false, true = ZIP files into an encrypted ZIP-file using a password (NOT the master password)
@@ -14,11 +19,20 @@
     $securedlt           = $false             # $true or $false, true = secure delete   false = skip secure delete
 
     $backup_date_format  = get-date -Format "yyyy-MM-dd_hhmmss"
-
+    
+    # Nothing to change below this line --------------------------------------------------------------------------------------------------
     $key                 = $null              # don't change this
 
+    # We have to verify that we are on the correct server
+    $currentServer = bw config server
+    Write-Host "Currently configured server: $currentServer"
+    if ($currentServer -ne $server) {
+      bw config server $server | Out-Null
+      Write-Host "Set server to: $server"
+    }
+
     # Master Password Prompt
-    $masterPass = Read-Host -assecurestring "Please enter your master password"
+    $masterPass = Read-Host -assecurestring "Please enter your master password for user ``$username``"
     $masterPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($masterPass))
 
     # Attempt Login
@@ -55,7 +69,7 @@
     Write-Host "`nExporting Bitwarden Vault"
     bw sync
     Write-Host "`n"
-    if ($organizationID -ne "<organizationid>" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
+    if ($organizationID.ToLower() -notmatch "organizationid" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
       bw export --output "$backupPath\$backupFile.enc.json" --organizationid $organizationID --password '$encPass'
     } else {
       bw export --output "$backupPath\$backupFile.enc.json" --format encrypted_json --password '$encPass'
@@ -63,7 +77,7 @@
     Write-Host "`n"
 
     # Backup Attachments
-    if ($organizationID -ne "<organizationid>" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
+    if ($organizationID.ToLower() -notmatch "organizationid" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
       $vault = bw list items --organizationid $organizationID | ConvertFrom-Json
     } else {
       $vault = bw list items | ConvertFrom-Json
@@ -97,7 +111,7 @@
     }
 
     # Logging Out/Termination Prep
-    Write-Host "The $(if ($organizationID -ne '<organizationid>' -And -Not ([string]::IsNullOrEmpty($organizationid))) {'organization'} else {'personal'}) vault has been backed up."
+    Write-Host "The $(if ($organizationID.ToLower() -notmatch 'organizationid' -And -Not ([string]::IsNullOrEmpty($organizationid))) {'organization'} else {'personal'}) vault has been backed up."
     bw logout
     "`n"
 
