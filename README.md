@@ -1,5 +1,6 @@
 # Bitwarden Attachment Exporter
 This PowerShell-script is a fork and extension of [justincswong/Bitwarden-Attachment-Exporter](https://github.com/justincswong/Bitwarden-Attachment-Exporter). Additional features include:
+- Using a self-hosted instance or the Bitwarden server in the EU as well.
 - Possibility to backup your organization vault by providing an organization ID.
 - ZIP everything into a single, encrypted file (encrypted export + attachments) using [7-Zip](https://www.7-zip.org/).
 - Cleaning up everything, so you end up with a single backup file containing everything.
