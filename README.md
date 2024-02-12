@@ -42,10 +42,10 @@ Optional:
 
 ## Output of the script
 - Backup\
-  - yyyy-MM-dd_HHmmss_Bitwarden_backup.zip
+  - yyyy-MM-dd_HHmmss_Bitwarden_backup[-org].zip
   
 The ZIP-file will have the following structure:
-- yyyy-MM-dd_HHmmss_Bitwarden_backup.zip
+- yyyy-MM-dd_HHmmss_Bitwarden_backup[-org].zip
 - yyyy-MM-dd_HHmmss_Attachments\
     - [item1]-attachment1
     - [item1]-attachment2
@@ -62,6 +62,9 @@ The ZIP-file will have the following structure:
 
 ## Known issues/ToDos
 - Special characters like German umlauts in the name of an entry are not encoded correctly when saving attachments, e. g. `ü` &rarr; `├╝`.
+- Interactive vs. scripted version:
+  - For the interactive one, provide the user options to select from, e. g. organization-backup vs. backup of the personal vault, EU vs. US Bitwarden-vault, filename, ...
+  - A completely scriptable version (would require some fiddling with the API-authentication, though).
 
 ## DISCLAIMER
 This script works ***for me***. I can not be held responsible for any damage you experience when using it. ***Use it at your own risk!***

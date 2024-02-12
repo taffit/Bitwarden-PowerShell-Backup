@@ -8,7 +8,7 @@
     #    Self-hosted instance: e. g. https://my_bitwarden.selfhosted.com
     $server              = "https://bitwarden.com"
     $username            = "username"         # keep the quotes, your username
-    $organizationID      = "organizationid"   # If an organizationid is provided, the organization vault is backed up
+    $organizationID      = "organizationid"   # If an organizationid is provided, the organization vault is backed up
                                               # Leave it as is or empty to backup your personal vault
     # We encrypt by default, everything else is insecure
     $sevenZip            = $true              # $true or $false, true = ZIP files into an encrypted ZIP-file using a password (NOT the master password)
@@ -32,7 +32,7 @@
     }
 
     # Master Password Prompt
-    $masterPass = Read-Host -assecurestring "Please enter your master password for user ``$username``"
+    $masterPass = Read-Host -assecurestring -join("Please enter your master password for user ``$username``", $(if ($organizationID.ToLower() -notmatch "organizationid" -And -Not ([string]::IsNullOrEmpty($organizationid))) {" (organization: $($organizationID))"}))
     $masterPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($masterPass))
 
     # Attempt Login
@@ -63,6 +63,9 @@
     }
     $backupPath = (Convert-Path -LiteralPath $backupFolder)
     $backupFile = "$($backup_date_format)_Bitwarden_backup"
+    if ($organizationID.ToLower() -notmatch "organizationid" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
+      $backupFile = $($backupFile + "-org")
+    }
     $attachmentsPath = "$backupPath\$($backup_date_format)_Attachments"
 
     # Backup Vault
