@@ -8,7 +8,7 @@
     #    Self-hosted instance: e. g. https://my_bitwarden.selfhosted.com
     $server              = "https://bitwarden.com"
     $username            = "username"         # keep the quotes, your username
-    $organizationID      = "organizationid"   # If an organizationid is provided, the organization vault is backed up
+    $organizationID      = "organizationid"   # If an organizationid is provided, the organization vault is backed up
                                               # Leave it as is or empty to backup your personal vault
     # We encrypt by default, everything else is insecure
     $sevenZip            = $true              # $true or $false, true = ZIP files into an encrypted ZIP-file using a password (NOT the master password)
@@ -73,7 +73,7 @@
     bw sync
     Write-Host "`n"
     if ($organizationID.ToLower() -notmatch "organizationid" -And -Not ([string]::IsNullOrEmpty($organizationid))) {
-      bw export --output "$backupPath\$backupFile.enc.json" --organizationid $organizationID --password '$encPass'
+      bw export --output "$backupPath\$backupFile.enc.json" --format encrypted_json --organizationid $organizationID --password '$encPass'
     } else {
       bw export --output "$backupPath\$backupFile.enc.json" --format encrypted_json --password '$encPass'
     }

@@ -8,8 +8,8 @@ This PowerShell-script is a fork and extension of [justincswong/Bitwarden-Attach
 This script provides a good balance between transparency (just read the `Bitwarden-backup.ps1`-file, it uses the standard Bitwarden-CLI), convenience (configure once, run and you will end up with a single backup-file) and completeness (it contains all items as well as the attachments).
 
 ## Requirements
-- Install the official [Bitwarden CLI](https://github.com/bitwarden/cli) according to the instructions on the page.
-> ***Note:*** The easiest way on Windows is probably to use `WinGet`: `winget install Bitwarden.CLI` and restart the shell, so the executable is available in your `%PATH%`. If you download just the native executable, either put it in the `%PATH%` or adjust the `%PATH%` environment variable so the executable can be found.    
+- Install the official [Bitwarden CLI](https://bitwarden.com/help/cli/) (note that the [original one](https://github.com/bitwarden/cli) has been archived) according to the instructions on the page.
+> ***Note:*** The easiest way on Windows is probably to use `WinGet`: `winget install Bitwarden.CLI` and restart the shell/system, so the executable is available in your `%PATH%`. If you download just the native executable, either put it in the `%PATH%` or adjust the `%PATH%` environment variable so the executable can be found.    
 > Ensure that `bw` can be executed. It should present you the command help text.
 
 Optional:  
